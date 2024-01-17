@@ -1,3 +1,3 @@
 ### Writing An Interpreter In Go
 
-- Stoped at 1.5 - Start of a REPL
+- Stoped at 2.0 - Parsing
