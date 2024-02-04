@@ -1,3 +1,3 @@
 ### Writing An Interpreter In Go
 
-- Stoped at 2.5 - Parsing return statements
+- Stoped at 2.6 - Parsing Expressions
