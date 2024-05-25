@@ -1,4 +1,3 @@
 ### Writing An Interpreter In Go
 
-- Stoped at 2.6 - Parsing Expressions
-    - INFIX OPERATORS
+- Stoped at 2.7 - How Pratt Parsing Works
