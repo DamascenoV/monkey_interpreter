@@ -57,7 +57,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.nextToken()
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
-	p.registerPrefix(token.INT, p.parserIntegerLiteral)
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 
@@ -119,6 +119,8 @@ func (p *Parser) parseStatement() ast.Statement {
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+    defer untrace(trace("parseExpressionStatement"))
+
 	stmt := &ast.ExpressionStatement{Token: p.curlToken}
 
 	stmt.Expression = p.parseExpression(LOWEST)
@@ -136,6 +138,8 @@ func (p *Parser) noPrefixFnError(t token.TokenType) {
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
+    defer untrace(trace("parseExpression"))
+
 	prefix := p.prefixParseFns[p.curlToken.Type]
 	if prefix == nil {
 		p.noPrefixFnError(p.curlToken.Type)
@@ -173,7 +177,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
-	for !p.curTokenIs(token.SEMICOLON) {
+	for !p.curlTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
@@ -185,14 +189,14 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 
 	p.nextToken()
 
-	for !p.curTokenIs(token.SEMICOLON) {
+	for !p.curlTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
 	return stmt
 }
 
-func (p *Parser) curTokenIs(t token.TokenType) bool {
+func (p *Parser) curlTokenIs(t token.TokenType) bool {
 	return p.curlToken.Type == t
 }
 
@@ -218,7 +222,9 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
 
-func (p *Parser) parserIntegerLiteral() ast.Expression {
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+    defer untrace(trace("parseIntegerLiteral"))
+
 	lit := &ast.IntegerLiteral{Token: p.curlToken}
 
 	value, err := strconv.ParseInt(p.curlToken.Literal, 0, 64)
@@ -234,6 +240,8 @@ func (p *Parser) parserIntegerLiteral() ast.Expression {
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
+    defer untrace(trace("parsePrefixExpression"))
+
 	expression := &ast.PrefixExpression{
 		Token:    p.curlToken,
 		Operator: p.curlToken.Literal,
@@ -247,6 +255,8 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+    defer untrace(trace("parseInfixExpression"))
+
 	expression := &ast.InfixExpression{
 		Token:    p.curlToken,
 		Operator: p.curlToken.Literal,
@@ -255,7 +265,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 
 	precedence := p.curPrecedence()
 	p.nextToken()
-	expression.Right = p.parseExpression(precedence)
+    expression.Right = p.parseExpression(precedence)
 
 	return expression
 }

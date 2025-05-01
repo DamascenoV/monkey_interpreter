@@ -21,7 +21,7 @@ func New(input string) *Lexer {
 }
 
 func (l *Lexer) readChar() {
-	// If the next ch is greater or equal to the size of the input we will reeturn the final of the file
+	// If the next ch is greater or equal to the size of the input we will return the final of the file
 	if l.readPosition >= len(l.input) {
 		l.ch = 0
 	} else {
