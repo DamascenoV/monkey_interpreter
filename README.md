@@ -1,3 +1,3 @@
 ### Writing An Interpreter In Go
 
-- Stopped at 2.9 - Read-Parse-Print-Loop
+- Stopped at 3.0 - Evaluation
