@@ -54,20 +54,53 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"4 == 7", false},
 		{"4 != 4", false},
 		{"4 != 7", true},
-        {"true == true", true},
-        {"false == false", true},
-        {"true == false", false},
-        {"true != false", true},
-        {"(4 < 7) == true", true},
-        {"(4 < 7) == false", false},
-        {"(4 > 7) == true", false},
-        {"(4 > 7) == false", true},
+		{"true == true", true},
+		{"false == false", true},
+		{"true == false", false},
+		{"true != false", true},
+		{"(4 < 7) == true", true},
+		{"(4 < 7) == false", false},
+		{"(4 > 7) == true", false},
+		{"(4 > 7) == false", true},
 	}
 
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
+}
+
+func TestIfElseExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{"if (true) { 4 }", 4},
+		{"if (false) { 4 }", nil},
+		{"if (1) { 7 }", 7},
+		{"if (4 < 7) { 24 }", 24},
+		{"if (4 > 7) { 24 }", nil},
+		{"if (4 > 7) { 24 } else { 555 }", 555},
+		{"if (4 < 7) { 24 } else { 555 }", 24},
+	}
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+        integer, ok := tt.expected.(int)
+        if ok {
+            testIntegerObject(t, evaluated, int64(integer))
+        } else {
+            testNullObject(t, evaluated)
+        }
+    }
+}
+
+func testNullObject(t *testing.T, obj object.Object) bool {
+    if obj != NULL {
+        t.Errorf("object is not NULL, got=%T (%+v)", obj, obj)
+        return false
+    }
+    return true
 }
 
 func TestBangOperator(t *testing.T) {
