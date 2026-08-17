@@ -121,12 +121,60 @@ func TestReturnStatements(t *testing.T) {
     }
 }
 
-func testNullObject(t *testing.T, obj object.Object) bool {
-    if obj != NULL {
-        t.Errorf("object is not NULL, got=%T (%+v)", obj, obj)
-        return false
+func TestErrorHandling(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+        {
+            "4 + true;",
+            "type mismatch: INTEGER + BOOLEAN",
+        },
+        {
+            "4 + true; 7",
+            "type mismatch: INTEGER + BOOLEAN",
+        },
+        {
+            "-true",
+            "unknown operator: -BOOLEAN",
+        },
+        {
+            "true + false",
+            "unknown operator: BOOLEAN + BOOLEAN",
+        },
+        {
+            "4; true + false; 7",
+            "unknown operator: BOOLEAN + BOOLEAN",
+        },
+        {
+            "if (7 > 4) { true + false; }",
+            "unknown operator: BOOLEAN + BOOLEAN",
+        },
+        {
+            `if (7 > 4) {
+                if (7  > 4) {
+                    return true + false;
+                }
+
+                return 24;
+            }`,
+            "unknown operator: BOOLEAN + BOOLEAN",
+        },
     }
-    return true
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+
+        errObj, ok := evaluated.(*object.Error)
+        if !ok {
+            t.Errorf("no error object returned. got=%T(%+v)", evaluated, evaluated)
+            continue
+        }
+
+        if errObj.Message != tt.expected {
+            t.Errorf("wrong error message. expected=%q, got=%q", tt.expected, errObj.Message)
+        }
+    }
 }
 
 func TestBangOperator(t *testing.T) {
@@ -146,6 +194,14 @@ func TestBangOperator(t *testing.T) {
 		evaluated := testEval(tt.input)
 		testBooleanObject(t, evaluated, tt.expected)
 	}
+}
+
+func testNullObject(t *testing.T, obj object.Object) bool {
+    if obj != NULL {
+        t.Errorf("object is not NULL, got=%T (%+v)", obj, obj)
+        return false
+    }
+    return true
 }
 
 func testEval(input string) object.Object {
